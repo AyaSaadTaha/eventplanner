@@ -1,6 +1,5 @@
 package org.example.eventplannerbackend.service;
 
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.eventplannerbackend.dto.EventDTO;
@@ -12,7 +11,6 @@ import org.example.eventplannerbackend.model.Participant;
 import org.example.eventplannerbackend.repository.EventRepository;
 import org.example.eventplannerbackend.repository.ParticipantRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
@@ -21,71 +19,94 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EventService {
     private final EventRepository eventRepository;
     private final ParticipantRepository participantRepository;
     private final ModelMapper modelMapper;
 
-    // Event erstellen
+    /**
+     * Creates a new event.
+     * @param eventDTO The event data transfer object.
+     * @return The created EventDTO.
+     */
     public EventDTO createEvent(EventDTO eventDTO) {
         Event event = modelMapper.map(eventDTO, Event.class);
         Event savedEvent = eventRepository.save(event);
         return modelMapper.map(savedEvent, EventDTO.class);
     }
 
-    // Alle Events abrufen
+    /**
+     * Retrieves all events.
+     * @return A list of all EventDTOs.
+     */
     public List<EventDTO> getAllEvents() {
         return eventRepository.findAll().stream()
-                .map(event -> {
-                    EventDTO dto = modelMapper.map(event, EventDTO.class);
-                    dto.setParticipantIds(event.getParticipants().stream()
-                            .map(Participant::getId)
-                            .collect(Collectors.toSet()));
-                    return dto;
-                })
+                .map(event -> modelMapper.map(event, EventDTO.class))
                 .collect(Collectors.toList());
     }
 
-    // Event nach ID abrufen
+    /**
+     * Retrieves an event by its ID.
+     * @param id The ID of the event.
+     * @return The EventDTO.
+     */
     public EventDTO getEventById(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
         return modelMapper.map(event, EventDTO.class);
     }
 
-    // Event aktualisieren
+    /**
+     * Updates an existing event.
+     * @param id The ID of the event to update.
+     * @param eventDTO The updated event data.
+     * @return The updated EventDTO.
+     */
     public EventDTO updateEvent(Long id, EventDTO eventDTO) {
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        modelMapper.map(eventDTO, existingEvent);
+        existingEvent.setName(eventDTO.getName());
+        existingEvent.setDate(eventDTO.getDate());
+        existingEvent.setLocation(eventDTO.getLocation());
+        existingEvent.setDescription(eventDTO.getDescription());
+
         Event updatedEvent = eventRepository.save(existingEvent);
         return modelMapper.map(updatedEvent, EventDTO.class);
     }
 
-    // Event löschen
+    /**
+     * Deletes an event by its ID.
+     * @param id The ID of the event to delete.
+     */
     public void deleteEvent(Long id) {
+        if (!eventRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Event not found");
+        }
         eventRepository.deleteById(id);
     }
 
-    // Teilnehmern im Event
-    @Transactional
+    /**
+     * Retrieves all participants for a specific event.
+     * @param eventId The ID of the event.
+     * @return A set of ParticipantDTOs.
+     */
     public Set<ParticipantDTO> getEventParticipants(Long eventId) {
         Event event = eventRepository.findByIdWithParticipants(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         return event.getParticipants().stream()
-                .map(participant -> {
-                    ParticipantDTO dto = modelMapper.map(participant, ParticipantDTO.class);
-                    dto.setEventIds(participant.getEvents().stream()
-                            .map(Event::getId)
-                            .collect(Collectors.toSet()));
-                    return dto;
-                })
+                .map(participant -> modelMapper.map(participant, ParticipantDTO.class))
                 .collect(Collectors.toSet());
     }
 
-    // Teilnehmer zu Event hinzufügen
+    /**
+     * Adds a participant to an event.
+     * @param eventId The ID of the event.
+     * @param participantId The ID of the participant to add.
+     * @return The updated EventDTO.
+     */
     public EventDTO addParticipant(Long eventId, Long participantId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
@@ -94,17 +115,31 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
 
         event.getParticipants().add(participant);
-        Event updatedEvent = eventRepository.save(event);
-        return modelMapper.map(updatedEvent, EventDTO.class);
+        // Important: You need to manage both sides of the bidirectional relationship
+        participant.getEvents().add(event);
+
+        eventRepository.save(event);
+        return modelMapper.map(event, EventDTO.class);
     }
 
-    // Teilnehmer von Event entfernen
+    /**
+     * Removes a participant from an event.
+     * @param eventId The ID of the event.
+     * @param participantId The ID of the participant to remove.
+     * @return The updated EventDTO.
+     */
     public EventDTO removeParticipant(Long eventId, Long participantId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        event.getParticipants().removeIf(p -> p.getId().equals(participantId));
-        Event updatedEvent = eventRepository.save(event);
-        return modelMapper.map(updatedEvent, EventDTO.class);
+        Participant participant = participantRepository.findById(participantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
+
+        event.getParticipants().remove(participant);
+        // Important: You need to manage both sides of the bidirectional relationship
+        participant.getEvents().remove(event);
+
+        eventRepository.save(event);
+        return modelMapper.map(event, EventDTO.class);
     }
 }
