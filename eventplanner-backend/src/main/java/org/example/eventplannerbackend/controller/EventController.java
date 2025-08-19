@@ -35,7 +35,7 @@ public class EventController {
      * Retrieves all events.
      * @return A list of all EventDTOs.
      */
-    @GetMapping
+    @GetMapping("/getAllEvents")
     public ResponseEntity<List<EventDTO>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents());
     }
@@ -45,7 +45,7 @@ public class EventController {
      * @param id The ID of the event.
      * @return The EventDTO.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/getEventById/{id}")
     public ResponseEntity<EventDTO> getEventById(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
@@ -56,7 +56,7 @@ public class EventController {
      * @param eventDTO The updated event data.
      * @return The updated EventDTO.
      */
-    @PutMapping("/{id}")
+    @PutMapping("/updateEvent/{id}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Long id, @Valid @RequestBody EventDTO eventDTO) {
         return ResponseEntity.ok(eventService.updateEvent(id, eventDTO));
     }
@@ -66,7 +66,7 @@ public class EventController {
      * @param id The ID of the event.
      * @return A response with no content.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteEvent/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
@@ -77,7 +77,7 @@ public class EventController {
      * @param eventId The ID of the event.
      * @return A set of ParticipantDTOs.
      */
-    @GetMapping("/{eventId}/participants")
+    @GetMapping("/getEventParticipants/{eventId}")
     public ResponseEntity<Set<ParticipantDTO>> getEventParticipants(@PathVariable Long eventId) {
         return ResponseEntity.ok(eventService.getEventParticipants(eventId));
     }
@@ -89,7 +89,7 @@ public class EventController {
      * @param participantId The ID of the participant.
      * @return The updated EventDTO.
      */
-    @PostMapping("/{eventId}/participants/{participantId}")
+    @PostMapping("/{eventId}/addParticipant/{participantId}")
     public ResponseEntity<EventDTO> addParticipant(@PathVariable Long eventId, @PathVariable Long participantId) {
         return ResponseEntity.ok(eventService.addParticipant(eventId, participantId));
     }
@@ -102,7 +102,7 @@ public class EventController {
      * @param participantId The ID of the participant.
      * @return The updated EventDTO.
      */
-    @DeleteMapping("/{eventId}/participants/{participantId}")
+    @DeleteMapping("/{eventId}/removeParticipant/{participantId}")
     public ResponseEntity<EventDTO> removeParticipant(@PathVariable Long eventId, @PathVariable Long participantId) {
         return ResponseEntity.ok(eventService.removeParticipant(eventId, participantId));
     }

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/eventplanner.iml" filepath="$PROJECT_DIR$/eventplanner.iml" />
       <module fileurl="file://$PROJECT_DIR$/eventplanner-backend/eventplanner-backend.iml" filepath="$PROJECT_DIR$/eventplanner-backend/eventplanner-backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eventplanner-frontend/eventplanner-frontend.iml" filepath="$PROJECT_DIR$/eventplanner-frontend/eventplanner-frontend.iml" />
     </modules>
   </component>
 </project>

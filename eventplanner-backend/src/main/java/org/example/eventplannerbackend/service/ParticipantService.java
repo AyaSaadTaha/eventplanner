@@ -2,6 +2,7 @@ package org.example.eventplannerbackend.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.example.eventplannerbackend.dto.EventDTO;
 import org.example.eventplannerbackend.dto.ParticipantDTO;
 import org.example.eventplannerbackend.exception.ResourceNotFoundException;
 import org.example.eventplannerbackend.model.Event;
@@ -19,8 +20,8 @@ import jakarta.transaction.Transactional;
 
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class ParticipantService {
     private final ParticipantRepository participantRepository;
     private final EventRepository eventRepository;
@@ -108,7 +109,14 @@ public class ParticipantService {
         participantRepository.save(participant);
         eventRepository.save(event);
 
-        return modelMapper.map(participant, ParticipantDTO.class);
+       /* ParticipantDTO dto = new ParticipantDTO();
+        dto.setId(participant.getId());
+        dto.setFirstName(participant.getFirstName());
+        dto.setLastName(participant.getLastName());
+        dto.setEmail(participant.getEmail());
+
+        return dto;*/
+       return modelMapper.map(participant, ParticipantDTO.class);
     }
 
     /**
@@ -132,5 +140,14 @@ public class ParticipantService {
         eventRepository.save(event);
 
         return modelMapper.map(participant, ParticipantDTO.class);
+    }
+
+    public Set<EventDTO> getEventParticipants(Long participantId) {
+        Participant participant = participantRepository.findByIdWithParticipants(participantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+
+        return participant.getEvents().stream()
+                .map(event -> modelMapper.map(event, EventDTO.class))
+                .collect(Collectors.toSet());
     }
 }

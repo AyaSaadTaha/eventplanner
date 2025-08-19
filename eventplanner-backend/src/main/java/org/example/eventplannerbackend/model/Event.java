@@ -1,6 +1,7 @@
 package org.example.eventplannerbackend.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,9 +21,12 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "events")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include  // ← تضمين ID فقط في equals و hashCode
     private Long id;
 
     @NotBlank(message = "Event name is required")
@@ -44,6 +50,7 @@ public class Event {
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "participant_id")
     )
-    @JsonManagedReference
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude  // ← استثناء العلاقة
     private Set<Participant> participants = new HashSet<>();
 }

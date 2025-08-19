@@ -1,12 +1,14 @@
 package org.example.eventplannerbackend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.eventplannerbackend.dto.EventDTO;
 import org.example.eventplannerbackend.dto.ParticipantDTO;
 import org.example.eventplannerbackend.service.ParticipantService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 
 /**
  * REST Controller for managing participants.
@@ -32,7 +34,7 @@ public class ParticipantController {
      * Retrieves all participants.
      * @return A list of all ParticipantDTOs.
      */
-    @GetMapping
+    @GetMapping("/getAllParticipants")
     public ResponseEntity<List<ParticipantDTO>> getAllParticipants() {
         return ResponseEntity.ok(participantService.getAllParticipants());
     }
@@ -42,7 +44,7 @@ public class ParticipantController {
      * @param id The ID of the participant.
      * @return The ParticipantDTO.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/getParticipantById/{id}")
     public ResponseEntity<ParticipantDTO> getParticipantById(@PathVariable Long id) {
         return ResponseEntity.ok(participantService.getParticipantById(id));
     }
@@ -53,7 +55,7 @@ public class ParticipantController {
      * @param participantDTO The updated participant data.
      * @return The updated ParticipantDTO.
      */
-    @PutMapping("/{id}")
+    @PutMapping("/updateParticipant/{id}")
     public ResponseEntity<ParticipantDTO> updateParticipant(@PathVariable Long id, @Valid @RequestBody ParticipantDTO participantDTO) {
         return ResponseEntity.ok(participantService.updateParticipant(id, participantDTO));
     }
@@ -63,7 +65,7 @@ public class ParticipantController {
      * @param id The ID of the participant.
      * @return A response with no content.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteParticipant/{id}")
     public ResponseEntity<Void> deleteParticipant(@PathVariable Long id) {
         participantService.deleteParticipant(id);
         return ResponseEntity.noContent().build();
@@ -98,4 +100,10 @@ public class ParticipantController {
                 participantService.removeParticipantFromEvent(participantId, eventId)
         );
     }
+
+    @GetMapping("/getEventParticipants/{participantId}")
+    public ResponseEntity<Set<EventDTO>> getEventParticipants(@PathVariable Long participantId) {
+        return ResponseEntity.ok(participantService.getEventParticipants(participantId));
+    }
+
 }

@@ -3,18 +3,24 @@ package org.example.eventplannerbackend.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Entity
 @Table(name = "participants")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)  // ← التركيز على حقول معينة
+
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include  // ← تضمين ID فقط في equals و hashCode
     private Long id;
 
     @NotBlank(message = "First name is required")
@@ -31,6 +37,7 @@ public class Participant {
     private String email;
 
     @ManyToMany(mappedBy = "participants")
-    @JsonBackReference
+    @JsonManagedReference
+    @EqualsAndHashCode.Exclude  // ← استثناء العلاقة
     private Set<Event> events = new HashSet<>();
 }

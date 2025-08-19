@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
     private final ParticipantRepository participantRepository;
