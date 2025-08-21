@@ -32,7 +32,7 @@ services:
     environment:
       - POSTGRES_DB=eventdb
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=Aya
+      - POSTGRES_PASSWORD=PASSWORD
     ports:
       - "5432:5432"
     volumes:
